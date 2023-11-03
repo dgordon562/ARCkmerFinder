@@ -1,0 +1,14 @@
+---
+assembly: example/assembly2.fa
+# the following 2 files have format: (name of dataset) (fof of short reads) (location of meryl database)
+file_of_datasets_of_kmers_to_find: example/datasets_to_add.fof
+file_of_datasets_of_kmers_to_remove: example/datasets_to_subtract.fof
+name_of_subtracted_meryl_database: to_find_minus_to_remove.meryl
+max_number_of_kmers_indicating_an_error: 0
+# I'm not sure that window_size_in_kb can be changed and the pipeline still work.
+# There might be some place in the code where 20kb is assumed.
+window_size_in_kb: 20
+bed_file_of_putative_introgressed_regions: example/introgressed.bed
+# this is the # of contigs to display on the left
+# this is the # of contigs to display on the right
+number_of_contigs_to_display_left_and_right:  1

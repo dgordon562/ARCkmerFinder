@@ -1,0 +1,252 @@
+import sys
+import os
+import re
+
+
+configfile: "config.yaml"
+
+
+if not os.path.exists( "log" ):
+        os.makedirs("log" )
+
+
+
+szBedFileOfPutativeIntrogressedRegions = config["bed_file_of_putative_introgressed_regions"]
+szAssemblyBasename = os.path.splitext( os.path.basename( config["assembly"] ) )[0]
+print( f"szAssemblyBasename = {szAssemblyBasename}" )
+szAssemblyBedFile = szAssemblyBasename + ".bed"
+
+
+szKmerCountRoot = szAssemblyBasename + "_" + str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers"
+szKmerCountWig = szKmerCountRoot + ".wig"
+szKmerCountBed = szKmerCountRoot + ".bed"
+szKmerCountBedWithWindow = szKmerCountRoot + ".bed_with_window"
+szKmerCountInWindows = szKmerCountRoot + "_in_" + str( config[ "window_size_in_kb" ] ) + "kb_windows.bed"
+
+# the difference between szKmerCountBedWithWindow and
+# szKmerCountInWindows is that the "WithWindow" still has a bed file
+# line for each assembly base position, but the "InWindows" file has a
+# single bed line for each 20kb window (far fewer bed lines)
+
+
+szKmerCountInWindowsWithColor = szKmerCountRoot + "_in_" + str( config[ "window_size_in_kb" ] ) + "kb_windows_with_color.bed"  
+
+szWindowsAcrossGenome = szAssemblyBasename + "_" + str( config[ "window_size_in_kb" ] ) + "kb_windows.bed"
+
+szIdeogram = szAssemblyBasename + "_ideogram.png"
+szTopOnePerCentKmerCountWindows = "top_1_per_cent_kmer_windows.bed"
+
+
+szFileOfContigsToDisplayOnLeft  = "contigs_to_display_on_left.txt"
+szFileOfContigsToDisplayOnRight = "contigs_to_display_on_right.txt"
+
+
+dictShortReadDataSetForMerylDatabasePath = {}
+
+aFullPathOfMerylDatabaseOfKmersToFind = []
+aFullPathOfMerylDatabaseOfKmersToRemove = []
+
+with open( config["file_of_datasets_of_kmers_to_find"], "r" ) as fFileOfDataSetsOfKmersToFind:
+	while True:
+		szLine = fFileOfDataSetsOfKmersToFind.readline()
+		if ( szLine == "" ):
+			break
+		if ( szLine.rstrip() == "" ):
+			continue
+
+		aWords = szLine.split()
+		# looks like:
+		# (fof of short reads) (full path of meryl database)
+		if ( len( aWords ) != 2 ):
+			sys.exit( config["file_of_datasets_of_kmers_to_find" ] + " has a line " + szLine + " which should have 3 tokens but doesn't" )
+
+		dictShortReadDataSetForMerylDatabasePath[ aWords[1] ] = aWords[0]
+		aFullPathOfMerylDatabaseOfKmersToFind.append( aWords[1] )
+
+
+
+with open( config[ "file_of_datasets_of_kmers_to_remove" ], "r" ) as fFileOfDataSetsOfKmersToRemove:
+	while True:
+		szLine = fFileOfDataSetsOfKmersToRemove.readline()
+		if ( szLine == "" ):
+			break
+
+		if ( szLine.rstrip() == "" ):
+			continue
+
+		aWords = szLine.split()
+		# looks like:
+		# (fof of short reads) (full path of meryl database)
+
+		dictShortReadDataSetForMerylDatabasePath[ aWords[1] ] = aWords[0]
+		aFullPathOfMerylDatabaseOfKmersToRemove.append( aWords[1] )
+
+
+def szGetShortReadDataSetForMerylDatabase( wildcards ):
+	szPathOfMerylDatabase2 = str( wildcards.szPathOfMerylDatabase )
+	if ( szPathOfMerylDatabase2 not in dictShortReadDataSetForMerylDatabasePath ):
+		sys.exit( "could not find " + szPathOfMerylDatabase2 + " in dictShortReadDataSetForMerylDatabasePath" )
+	return dictShortReadDataSetForMerylDatabasePath[ szPathOfMerylDatabase2 ]
+
+
+def szGetNameOfMerylDatabaseWithLowOccurrenceKmers():
+	szTemp = re.sub( r'.meryl$', '', config["name_of_subtracted_meryl_database" ] )
+	return szTemp + "_no_" + str( max_number_of_kmers_indicating_an_error ) + "_low_freq_kmers.meryl" 
+
+rule makeIdeogram:
+	input: bed = szKmerCountInWindowsWithColor, left_contigs=szFileOfContigsToDisplayOnLeft, right_contigs=szFileOfContigsToDisplayOnRight, assemblyBedFile=szAssemblyBedFile, topOnePerCent=szTopOnePerCentKmerCountWindows
+	output: szIdeogram
+	run:
+		szCommand = "module load R/4.3.0-openblas && Rscript make_ideogram6_rectangles.R {output} {input.bed} Count " + szTopOnePerCentKmerCountWindows + " " + szBedFileOfPutativeIntrogressedRegions + " " + szAssemblyBedFile + " " + str(input.left_contigs ) + " " + str(input.right_contigs )
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+rule figureOutWhichContigsToDisplay:
+	input: config["assembly"] + ".fai"
+	output: szFileOfContigsToDisplayOnLeft, szFileOfContigsToDisplayOnRight
+	run:
+		szCommand = "figureOutWhichContigsToDisplay.sh {input} " + str( config["number_of_contigs_to_display_left_and_right"] ) + " " + szFileOfContigsToDisplayOnLeft + " " + szFileOfContigsToDisplayOnRight
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+rule find_top_one_per_cent_bed:
+	input: szKmerCountInWindows, szAssemblyBedFile
+	output: szTopOnePerCentKmerCountWindows
+	run:
+		szCommand = "makeBedFileWithTopOnePerCent.py --szInputBedFileWithNonZero20kbRegions " + szKmerCountInWindows + " --szBedFileOfAll20kbRegions " + szAssemblyBedFile + " --szOutputBedFile " + szTopOnePerCentKmerCountWindows;
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+rule addColors:
+	input: szKmerCountInWindows
+	output: szKmerCountInWindowsWithColor
+	run:
+		szCommand = "cat {input} | addColors2.py >{output}"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+rule groupby_kmer_counts_in_windows:
+	input: szKmerCountBedWithWindow
+	output: szKmerCountInWindows
+	run:
+		szCommand = "module load bedtools/2.29.2 && bedtools groupby -i {input} -g 6,7,8 -o count -c 5 >{output}"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+rule assign_kmer_counts_to_windows:
+	input: szWindowsAcrossGenome, szKmerCountBed
+	output: szKmerCountBedWithWindow
+	run:
+		szCommand = "module load bedtools2/2.31.0-gcc-8.2.0-7j35k74 && bedtools intersect -a " + szKmerCountBed + " -b " + szWindowsAcrossGenome + " -wa -wb | sort -k1,1V -k2,2n --parallel=9 --buffer-size=90G >" + szKmerCountBedWithWindow
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+rule make_windows_across_genome:
+	input: config["assembly"] + ".fai"
+	output: szWindowsAcrossGenome
+	run:
+		nWindowSize = config["window_size_in_kb"] * 1000
+		szCommand = "module load bedtools2/2.31.0-gcc-8.2.0-7j35k74 && bedtools makewindows -g " + str( input ) + " -w " + str( nWindowSize ) + " >" + szWindowsAcrossGenome
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+rule convert_wig_to_bed:
+	input: szAssemblyBasename + "_" + str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.wig"
+	output: szAssemblyBasename + "_" + str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.bed"
+	run:
+		szCommand = "module load bedops/2.4.41 && wig2bed <" + str( input ) + " >" + str( output )
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+rule make_meryl_lookup:
+	input:  str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.meryl.flag"
+	output: szAssemblyBasename + "_" + str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.wig"
+	run:
+		szMerylDatabase = re.sub( r'.flag$', '', str( input ) )
+		szCommand = "module load meryl/1.4.1 && meryl-lookup -wig-count -output " + str( output ) + " -sequence " + config["assembly"] + " -mers " +  szMerylDatabase 
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+rule remove_low_occurrence_kmers:
+	input: config["name_of_subtracted_meryl_database" ] + ".flag"
+	output: touch( str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.meryl.flag" )
+	run:
+		szCommand = "module load meryl/1.4.1 && meryl output " +  config["name_of_subtracted_meryl_database" ] + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ] ) + "_low_freq_kmers.meryl [ greater-than " + str( config[ "max_number_of_kmers_indicating_an_error" ]) + " " + config["name_of_subtracted_meryl_database" ] + " ]"	
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+rule subtract_find_minus_remove:
+	input: "all_meryl_databases_created_flag"
+	output: touch( config["name_of_subtracted_meryl_database" ] + ".flag" )
+	run:
+		# just creates an empty database
+		nIntermediateFile = 1
+		szIntermediateMerylDatabase = "intermediate1.meryl"
+		szCommand = "module load meryl/1.4.1 && meryl count k=21 output " + szIntermediateMerylDatabase
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		for szMerylDatabaseToAdd in aFullPathOfMerylDatabaseOfKmersToFind:
+		        nIntermediateFile += 1
+		        szNextIntermediateMerylDatabase = "intermediate" + str( nIntermediateFile ) + ".meryl"
+		        szCommand = "module load meryl/1.4.1 && meryl union-sum " + szIntermediateMerylDatabase + " " + szMerylDatabaseToAdd + " output " + szNextIntermediateMerylDatabase
+		        print( "about to execute: " + szCommand )
+		        shell( szCommand )
+		        szIntermediateMerylDatabase = szNextIntermediateMerylDatabase
+
+		for szMerylDatabaseToRemove in aFullPathOfMerylDatabaseOfKmersToRemove:
+		        nIntermediateFile += 1
+		        szNextIntermediateMerylDatabase = "intermediate" + str( nIntermediateFile ) + ".meryl"
+		        szCommand = "module load meryl/1.4.1 && meryl difference " + szIntermediateMerylDatabase + " " + szMerylDatabaseToRemove + " output " + szNextIntermediateMerylDatabase
+		        print( "about to execute: " + szCommand )
+		        shell( szCommand )
+		        szIntermediateMerylDatabase = szNextIntermediateMerylDatabase
+
+		# when get to here, the result is in szIntermediateMerylDatabase
+		# let's just rename that to the output
+		szCommand = "mv " + szIntermediateMerylDatabase + " " + config["name_of_subtracted_meryl_database" ]
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+
+rule make_all_meryl_databases:
+	input: expand( "{szPathOfMerylDatabase}.flag", szPathOfMerylDatabase = aFullPathOfMerylDatabaseOfKmersToFind), expand( "{szPathOfMerylDatabase}.flag", szPathOfMerylDatabase = aFullPathOfMerylDatabaseOfKmersToRemove )
+	output: touch( "all_meryl_databases_created_flag" )
+
+rule make_meryl_database_for_one_dataset:
+	input: szGetShortReadDataSetForMerylDatabase
+	output: touch( "{szPathOfMerylDatabase}.flag" )
+	run:
+		# debugging
+		print( "trying to generate " + str( output ) + " using input " + str( input ) )
+		# end debugging
+
+		szCommand = f"module load meryl/1.4.1 && meryl count k=21 {input} output {{wildcards.szPathOfMerylDatabase}}"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+		touch( output )
+
+
+rule assemblyFaiToBed:
+	input: config["assembly"] + ".fai"
+	output: szAssemblyBedFile
+	run:
+		szCommand = "cat {input} | awk '{{print $1\"\t1\t\"$2}}' >{output}"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+
+
+
+#rule clean:
+#	run:
+#		szCommand = "rm -rf all_meryl_databases_created_flag config["name_of_subtracted_meryl_database" ] + ".flag" str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.meryl.flag" szAssemblyBasename + "_" + str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.wig" str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.meryl.flag" szAssemblyBasename + "_" + str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.bed" szWindowsAcrossGenome szKmerCountBedWithWindow szAssemblyBasename + "_" + config["window_size"] + ".bed" szWindowsAcrossGenome 
+
+#expand( "{szPathOfMerylDatabase}.flag", szPathOfMerylDatabase = aFullPathOfMerylDatabaseOfKmersToFind), expand( "{szPathOfMerylDatabase}.flag", 
+
+
