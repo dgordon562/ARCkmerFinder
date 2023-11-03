@@ -1,0 +1,7 @@
+all_meryl_databases_created_flag
+.snakemake
+contigs_to_display_on_left.txt
+contigs_to_display_on_right.txt
+to_find_minus_to_remove.meryl.flag
+to_find_minus_to_remove.meryl_no_0_low_freq_kmers.meryl.flag
+top_1_per_cent_kmer_windows.bed
