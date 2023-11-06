@@ -256,6 +256,7 @@ rule make_meryl_database_for_one_dataset:
 rule assemblyFaiToBed:
 	input: config["assembly"] + ".fai"
 	output: szAssemblyBedFile
+	localrule: True
 	run:
 		szCommand = "cat {input} | awk '{{print $1\"\t1\t\"$2}}' >{output}"
 		print( "about to execute: " + szCommand )
