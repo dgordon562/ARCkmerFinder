@@ -82,7 +82,7 @@ with open( config[ "file_of_datasets_of_kmers_to_remove" ], "r" ) as fFileOfData
 
 
 def szGetShortReadDataSetForMerylDatabase( wildcards ):
-	szPathOfMerylDatabase2 = str( wildcards.szPathOfMerylDatabase )
+	szPathOfMerylDatabase2 = str( wildcards.szPathOfMerylDatabase ) + ".meryl"
 	if ( szPathOfMerylDatabase2 not in dictShortReadDataSetForMerylDatabasePath ):
 		sys.exit( "could not find " + szPathOfMerylDatabase2 + " in dictShortReadDataSetForMerylDatabasePath" )
 	return dictShortReadDataSetForMerylDatabasePath[ szPathOfMerylDatabase2 ]
@@ -232,13 +232,13 @@ rule subtract_find_minus_remove:
 
 
 rule make_all_meryl_databases:
-	input: expand( "{szPathOfMerylDatabase}.flag", szPathOfMerylDatabase = aFullPathOfMerylDatabaseOfKmersToFind), expand( "{szPathOfMerylDatabase}.flag", szPathOfMerylDatabase = aFullPathOfMerylDatabaseOfKmersToRemove )
+	input: expand( "{szPathOfMerylDatabase}", szPathOfMerylDatabase = aFullPathOfMerylDatabaseOfKmersToFind), expand( "{szPathOfMerylDatabase}", szPathOfMerylDatabase = aFullPathOfMerylDatabaseOfKmersToRemove )
 	output: touch( "all_meryl_databases_created_flag" )
 	localrule: True
 
 rule make_meryl_database_for_one_dataset:
 	input: szGetShortReadDataSetForMerylDatabase
-	output: touch( "{szPathOfMerylDatabase}.flag" )
+	output: "{szPathOfMerylDatabase}.meryl"
 	resources:
 		threads=40,
 		mem=100
@@ -247,10 +247,15 @@ rule make_meryl_database_for_one_dataset:
 		print( "trying to generate " + str( output ) + " using input " + str( input ) )
 		# end debugging
 
-		szCommand = f"module load meryl/1.4.1 && meryl count k=21 {input} output {{wildcards.szPathOfMerylDatabase}}"
+
+		szTemporaryMerylDatabaseName = str( output ) + ".almost_done"
+
+		szCommand = f"module load meryl/1.4.1 && meryl count k=21 {input} output " + szTemporaryMerylDatabaseName
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
-		touch( output )
+		szCommand = f"mv {szTemporaryDatabaseName} {{output}}"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
 
 
 rule assemblyFaiToBed:
