@@ -223,11 +223,20 @@ rule subtract_find_minus_remove:
 		        shell( szCommand )
 		        szIntermediateMerylDatabase = szNextIntermediateMerylDatabase
 
+		# how many kmers are left here
+		szCommand = "module load meryl/1.4.1 && meryl print " + szIntermediateMerylDatabase + "| wc -l >" + szIntermediateMerylDatabase + ".unique_kmers"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
 		# when get to here, the result is in szIntermediateMerylDatabase
 		# let's just rename that to the output
 		szCommand = "mv " + szIntermediateMerylDatabase + " " + config["name_of_subtracted_meryl_database" ]
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
+
+
+
 
 
 
