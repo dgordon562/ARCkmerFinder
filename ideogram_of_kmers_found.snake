@@ -64,10 +64,11 @@ with open( config["file_of_datasets_of_kmers_to_find"], "r" ) as fFileOfDataSets
 		dictShortReadDataSetForMerylDatabasePath[ aWords[1] ] = aWords[0]
 		aFullPathOfMerylDatabaseOfKmersToFind.append( aWords[1] )
 
+		szShortName = os.path.splitext( os.path.basename( aWords[1] ))[0] 
+		aBasenameOfMerylDatabaseOfKmersToFind.append( szShortName )
+        
 
 	# while True:
-	szShortName = os.path.splitext( os.path.basename( aWords[1] ))[0] 
-	aBasenameOfMerylDatabaseOfKmersToFind.append( szShortName )
 
 
 
@@ -88,16 +89,19 @@ with open( config[ "file_of_datasets_of_kmers_to_remove" ], "r" ) as fFileOfData
 		dictShortReadDataSetForMerylDatabasePath[ aWords[1] ] = aWords[0]
 		aFullPathOfMerylDatabaseOfKmersToRemove.append( aWords[1] )
 
+		szShortName = os.path.splitext( os.path.basename( aWords[1] ))[0] 
+		aBasenameOfMerylDatabaseOfKmersToRemove.append( szShortName )
+
 	# while True:
 
-	szShortName = os.path.splitext( os.path.basename( aWords[1] ))[0] 
-	aBasenameOfMerylDatabaseOfKmersToRemove.append( szShortName )
 
 
 
 szIdeogramTitle = "_".join( aBasenameOfMerylDatabaseOfKmersToFind ) + "_minus_" + "_".join( aBasenameOfMerylDatabaseOfKmersToRemove ) 
 szIdeogramFile = szIdeogramTitle + "_ideogram.png"
 
+print( f"szIdeogramTitle = {szIdeogramTitle}" )
+print( f"szIdeogramFile = {szIdeogramFile}" )
 
 
 
