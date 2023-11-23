@@ -41,6 +41,15 @@ library(dplyr)
 library(stringr)
 library(ggplotify)
 library(cowplot)
+
+
+if(!require('ggthemes')) {
+  install.packages( "ggthemes", repos='https://ftp.osuosl.org/pub/cran/' )  
+  library('ggthemes')
+}
+
+
+
 options(digits=20)
 options( echo = TRUE )
 
@@ -85,7 +94,9 @@ p2 <- as.ggplot(expression(kp <- plotKaryotype(genome = custom.genome, plot.type
                            regions$V3, y0 = 0.8, y1 = 1.0, col = "black", r0 = r0, r1 = r1 ),
    kpAxis(kp, ymin = 0, ymax = nMax, r0=r0, r1=r1, numticks = 3, col="#666666", cex=1.0)
 ))
-p1
+
+p1 <- p1 + theme_base()
+p2 <- p2 + theme_base()
 
 save_plot( szOutput,  plot_grid(p1, p2, ncol=2,  rel_widths = c(1.75,1)), base_width = 15, base_height = 9)
 
