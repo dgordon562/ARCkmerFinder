@@ -3,6 +3,7 @@
 
 import argparse
 import subprocess
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--szInputBedFileWithNonZero20kbRegions", required = True )
