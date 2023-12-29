@@ -21,6 +21,18 @@ szKmerCountWig = szKmerCountRoot + ".wig"
 szKmerCountBed = szKmerCountRoot + ".bed"
 szKmerCountBedWithWindow = szKmerCountRoot + ".bed_with_window"
 szKmerCountInWindows = szKmerCountRoot + "_in_" + str( config[ "region_size" ] ) + "_windows.bed"
+szWindowsAcrossGenomeWithZeroMatchingKmers = "zero_windows.bed"
+szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmers = "counts_in_all_windows.bed"
+
+szWindowsIncludingIntrogressedRegions = "windows_including_introgressed_regions.bed"
+szWindowsNotIncludingIntrogressedRegions = "windows_not_including_introgressed_regions.bed"
+szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions = "windows_across_genome_with_zero_and_nonzero_matching_kmers_and_including_introgressed_and_no_introgressed_regions.bed"
+
+# working here--when return put these into the rules such as count_meryl_database_after_removing_low_occurrence_kmers
+
+szSubtractedMerylDatabaseRemovedLowFreqKmers = str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.meryl"
+szSubtractedMerylDatabaseRemovedLowFreqKmersFlag = szSubtractedMerylDatabaseRemovedLowFreqKmers + ".flag"
+
 
 # the difference between szKmerCountBedWithWindow and
 # szKmerCountInWindows is that the "WithWindow" still has a bed file
@@ -30,8 +42,8 @@ szKmerCountInWindows = szKmerCountRoot + "_in_" + str( config[ "region_size" ] )
 
 szKmerCountInWindowsWithColor = szKmerCountRoot + "_in_" + str( config[ "region_size" ] ) + "_windows_with_color.bed"  
 
+# doesn't have counts--just windows
 szWindowsAcrossGenome = szAssemblyBasename + "_" + str( config[ "region_size" ] ) + "_windows.bed"
-
 szTopNPerCentKmerCountWindows = "top_N_per_cent_kmer_windows.bed"
 
 
@@ -40,12 +52,15 @@ szFileOfContigsToDisplayOnRight = "contigs_to_display_on_right.txt"
 
 
 dictShortReadDataSetForMerylDatabasePath = {}
+dictFullPathOfMerylDatabaseForBasename = {}
 
 aFullPathOfMerylDatabaseOfKmersToFind = []
 aFullPathOfMerylDatabaseOfKmersToRemove = []
 
 aBasenameOfMerylDatabaseOfKmersToFind = []
 aBasenameOfMerylDatabaseOfKmersToRemove = []
+
+
 
 with open( config["file_of_datasets_of_kmers_to_find"], "r" ) as fFileOfDataSetsOfKmersToFind:
 	while True:
@@ -66,6 +81,7 @@ with open( config["file_of_datasets_of_kmers_to_find"], "r" ) as fFileOfDataSets
 
 		szShortName = os.path.splitext( os.path.basename( aWords[1] ))[0] 
 		aBasenameOfMerylDatabaseOfKmersToFind.append( szShortName )
+		dictFullPathOfMerylDatabaseForBasename[ szShortName ] = aWords[1]
         
 
 	# while True:
@@ -92,6 +108,8 @@ with open( config[ "file_of_datasets_of_kmers_to_remove" ], "r" ) as fFileOfData
 		szShortName = os.path.splitext( os.path.basename( aWords[1] ))[0] 
 		aBasenameOfMerylDatabaseOfKmersToRemove.append( szShortName )
 
+		dictFullPathOfMerylDatabaseForBasename[ szShortName ] = aWords[1]
+
 	# while True:
 
 
@@ -100,10 +118,19 @@ with open( config[ "file_of_datasets_of_kmers_to_remove" ], "r" ) as fFileOfData
 szIdeogramTitle = "_".join( aBasenameOfMerylDatabaseOfKmersToFind ) + "_minus_" + "_".join( aBasenameOfMerylDatabaseOfKmersToRemove ) 
 szIdeogramFile = szIdeogramTitle + "_ideogram.png"
 
+szHistogramTitle = "_".join( aBasenameOfMerylDatabaseOfKmersToFind ) + "_minus_" + "_".join( aBasenameOfMerylDatabaseOfKmersToRemove ) 
+szHistogramFile = szHistogramTitle + "_histogram.png"
+
+szHistogramLogTitle = szHistogramTitle + "_logx"
+szHistogramLogFile  = szHistogramLogTitle + "_histogram.png"
+
+
 print( f"szIdeogramTitle = {szIdeogramTitle}" )
 print( f"szIdeogramFile = {szIdeogramFile}" )
 
 
+def szGetFullPathMerylDatabase( wildcards ):
+	return dictFullPathOfMerylDatabaseForBasename[ str( wildcards.szBasenameOfMerylDatabase ) ]
 
 
 def szGetShortReadDataSetForMerylDatabase( wildcards ):
@@ -119,7 +146,72 @@ def szGetNameOfMerylDatabaseWithLowOccurrenceKmers():
 
 
 rule all:
-	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szIdeogramFile, "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt", "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt"
+	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szIdeogramFile, "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt", "count_of_frequencies_all.png", "count_kmers_each_meryl_database_flag", szHistogramFile, szHistogramLogFile
+
+
+rule makeHistogram_logx:
+	input: szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
+	output: szHistogramLogFile
+	localrule: True
+	run:
+		szCommand = "module load R/4.3.0-openblas && Rscript histogram_logx.R " + szHistogramLogFile + " " + szHistogramLogTitle + " " + szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+rule makeHistogram_linear_no_limit:
+	input: szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
+	output: szHistogramFile
+	localrule: True
+	run:
+		szCommand = "module load R/4.3.0-openblas && Rscript histogram_linear_no_limit.R " + szHistogramFile + " " + szHistogramTitle + " " + szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+rule makeHistogramPrerequisites:
+	input: szWindowsAcrossGenome, szKmerCountInWindows, szBedFileOfPutativeIntrogressedRegions, szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
+	output: szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
+	run:
+		szCommand = f"./makeHistogramPrerequisites.py --szWindowsAcrossGenome {szWindowsAcrossGenome} --szKmerCountInWindows {szKmerCountInWindows} --szBedFileOfPutativeIntrogressedRegions {szBedFileOfPutativeIntrogressedRegions} --szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions {szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions}"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+
+rule makeKmerFrequencyPlot:
+	input: "count_of_frequencies_all.txt"
+	output: "count_of_frequencies_all.png"
+	localrule: True
+	run:
+		szCommand = "module load R/4.3.0-openblas && Rscript plot_kmer_freq6.R " + "Kmer_Frequency" + " " + str( input ) + " " + str( output )
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+rule makeKmerFrequencyPlotPrerequisite:
+	input: 	expand( "{szBasenameOfMerylDatabase}.counts", szBasenameOfMerylDatabase = aBasenameOfMerylDatabaseOfKmersToFind ), expand( "{szBasenameOfMerylDatabase}.counts", szBasenameOfMerylDatabase = aBasenameOfMerylDatabaseOfKmersToRemove )
+	output: "count_of_frequencies_all.txt"
+	localrule: True	
+	run:
+		with open( str( output ) + ".tmp", "w" ) as fOutput:
+			for szFile in list( input ):
+
+				szBasename = re.sub( r'.counts', '', szFile )
+
+				with open( szFile, "r" ) as fCountsOneFile:
+					while True:
+						szLine = fCountsOneFile.readline()
+						if ( szLine == "" ):
+							break
+						szLine = szLine.rstrip()
+						szLine += " "
+						szLine += szBasename
+						fOutput.write( szLine + "\n" )
+
+				# with open( szFile, "r" ) as fCountsOneFile:
+			#for szFile in list( input ):
+		#with open( str( output ), "w" ) as fOutput:
+
+		os.rename( str( output ) + ".tmp", str( output ) )
 
 
 rule makeIdeogram:
@@ -157,6 +249,23 @@ rule addColors:
 		szCommand = f"cat {{input.ccount}} | addColors3.py --szContigsToDisplayOnLeft {szFileOfContigsToDisplayOnLeft} --szContigsToDisplayOnRight {szFileOfContigsToDisplayOnRight} >{{output}}"
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
+
+
+# szKmerCountBedWithWindow differs from szKmerCountInWindows in that
+# each kmer has a line while szKmerCountInWindows has a single line for
+# each 20kb window
+
+# szKmerCountInWindows has a number, for each 20kb window, of kmers from
+# PNG16_vs_Chagyrskaya_minus_HG03516_greater_than_5.  If a kmer is found
+# more than once in the 20kb window, it is counted more than once?  Yes.
+# meryl-lookup notes for each kmer, how many times it is found in the
+# reads (by the meryl database).  But that count is ignored by this
+# pipeline.  Each kmer found is assigned to a 20kb window.  bedtools
+# groupby then counts how many kmers for each 20kb are found in the
+# meryl database.  Some of these kmers may be the same.  We don't know
+# and don't care.  Just how many kmers in each 20kb region are found in
+# the meryl database.
+
 
 rule groupby_kmer_counts_in_windows:
 	input: szKmerCountBedWithWindow
@@ -261,8 +370,7 @@ rule count_meryl_database_before_removing_low_occurrence_kmers:
 		shell( szCommand )
 
 
-		szCommand = "cat " + szTempOutput + " | awk '{{printf \"%\\47i\", $1 }}' >> " + szTempOutput
-		szCommand = "cat " + szTempOutput + " | awk '{{printf \"%\\47i\\n\", $1 }}' >> " + szTempOutput
+		szCommand = "cat " + szTempOutput + " | numfmt --grouping  >> " + szTempOutput
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
 
@@ -321,6 +429,68 @@ rule subtract_find_minus_remove:
 
 
 
+
+rule count_kmers_each_meryl_database:
+	input: expand( "{szBasenameOfMerylDatabase}.counts.txt", szBasenameOfMerylDatabase = aBasenameOfMerylDatabaseOfKmersToFind ), expand( "{szBasenameOfMerylDatabase}.counts.txt", szBasenameOfMerylDatabase = aBasenameOfMerylDatabaseOfKmersToRemove )
+	output: touch( "count_kmers_each_meryl_database_flag" )
+
+
+# meryl print looks like this:
+# AAAAAAAAAAAAAAAAAAAAA   1564811
+# AAAAAAAAAAAAAAAAAAAAC   65845
+# .
+# .
+# .
+# where the number is the # of times the given kmer is found in the
+# read dataset.
+# The number of lines is the number of distinct kmers.  The 2nd column 
+# is irrelevant.
+# But if awk '{print $2}' | sort -n | uniq -c
+# then it will look like this:
+# 2073056792 1
+# 89240217 2
+# 19355034 3
+# 8221172 4
+# which means 
+# 2073056792 kmers that occur 1 time in the read dataset
+# 89240217 kmers that occur 2 times in the read dataset
+# etc.
+# so the sum of the 1st column gives the number of distinct kmers.
+# (the sum of the product of the 1st and 2nd columns gives the number
+# of (nondistinct) kmers in the read dataset, but we aren't using that
+# number for anything)
+
+
+rule count_total_distinct_kmers:
+	input: "{szBasenameOfMerylDatabase}.counts"
+	output: "{szBasenameOfMerylDatabase}.counts.txt"
+	localrule: True
+	run:
+		szCommand = "cat " + str( input ) + " | awk '{{ nTotalDistinctKmers += $1 }} END {{ print nTotalDistinctKmers }}' >" + str( output ) + ".tmp"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "cat " + str(output ) + ".tmp >" + str( output )
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "cat " + str( output ) + ".tmp | numfmt --grouping >>" + str( output )	
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+rule count_kmers_one_meryl_database:
+	input: 	szGetFullPathMerylDatabase
+	output: "{szBasenameOfMerylDatabase}.counts"
+	resources:
+		threads=40,
+		mem=120,
+		disk=100
+	run:
+		# let's see if sort becomes a bottleneck here.  If it is, then we can give it more threads
+		szCommand = f"module load meryl/1.4.1 && meryl print " + str( input ) + " | awk '{{print $2}}' | sort -n | uniq -c >" + str( output )
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
 
 rule make_all_meryl_databases:
 	input: expand( "{szPathOfMerylDatabase}", szPathOfMerylDatabase = aFullPathOfMerylDatabaseOfKmersToFind), expand( "{szPathOfMerylDatabase}", szPathOfMerylDatabase = aFullPathOfMerylDatabaseOfKmersToRemove )
