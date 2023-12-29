@@ -18,3 +18,10 @@ top_1_per_cent_kmer_windows.bed
 *.pdf
 logs
 *.log
+*.counts
+*.counts.txt
+count_kmers_each_meryl_database_flag
+count_of_frequencies_all.txt
+intermediate*.meryl.unique_kmers
+kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt
+kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt
