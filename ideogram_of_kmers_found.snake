@@ -50,6 +50,8 @@ szTopNPerCentKmerCountWindows = "top_N_per_cent_kmer_windows.bed"
 szFileOfContigsToDisplayOnLeft  = "contigs_to_display_on_left.txt"
 szFileOfContigsToDisplayOnRight = "contigs_to_display_on_right.txt"
 
+fileLimitForHistogram = "x_limit_for_histogram.txt"
+
 
 dictShortReadDataSetForMerylDatabasePath = {}
 dictFullPathOfMerylDatabaseForBasename = {}
@@ -120,6 +122,8 @@ szIdeogramFile = szIdeogramTitle + "_ideogram.png"
 
 szHistogramTitle = "_".join( aBasenameOfMerylDatabaseOfKmersToFind ) + "_minus_" + "_".join( aBasenameOfMerylDatabaseOfKmersToRemove ) 
 szHistogramFile = szHistogramTitle + "_histogram.png"
+szHistogramFileLinearWithLimit = szHistogramTitle + "_with_limit_histogram.png"
+
 
 szHistogramLogTitle = szHistogramTitle + "_logx"
 szHistogramLogFile  = szHistogramLogTitle + "_histogram.png"
@@ -146,7 +150,7 @@ def szGetNameOfMerylDatabaseWithLowOccurrenceKmers():
 
 
 rule all:
-	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szIdeogramFile, "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt", "count_of_frequencies_all.png", "count_kmers_each_meryl_database_flag", szHistogramFile, szHistogramLogFile
+	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szIdeogramFile, "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt", "count_of_frequencies_all.png", "count_kmers_each_meryl_database_flag", szHistogramFile, szHistogramLogFile, szHistogramFileLinearWithLimit
 
 
 rule makeHistogram_logx:
@@ -158,6 +162,16 @@ rule makeHistogram_logx:
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
 
+rule makeHistogram_linear_with_limit:
+	input: szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
+	output: szHistogramFileLinearWithLimit
+	run:
+		szCommand = f"./findTopNPerCentForHistogramLimit2.py --szInputFile {szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions} --nWhichColumn 4 --fTopNPerCent 0.3 --szOutputFileContainingMax {fileLimitForHistogram}"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+		szCommand = "module load R/4.3.0-openblas && Rscript histogram_linear_with_limit.R " + szHistogramFileLinearWithLimit + " " + szHistogramTitle + " " + szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions + " `cat {fileLimitForHistogram}` "
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
 
 rule makeHistogram_linear_no_limit:
 	input: szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
