@@ -87,6 +87,7 @@ p1 <- as.ggplot(expression(kp <- plotKaryotype(genome = custom.genome, plot.type
            y0 = rTopOnePerCentWindowsBottom,
            y1 = rTopOnePerCentWindowsTop,
            col = "darkolivegreen",
+           border = "darkolivegreen",
            r0 = r0,
            r1 = r1 ),
 
@@ -113,6 +114,7 @@ p2 <- as.ggplot(expression(kp <- plotKaryotype(genome = custom.genome, plot.type
            y0 = rTopOnePerCentWindowsBottom,
            y1 = rTopOnePerCentWindowsTop,
            col = "darkolivegreen",
+           border = "darkolivegreen",
            r0 = r0,
            r1 = r1 ),
 
