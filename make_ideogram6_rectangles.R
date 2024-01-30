@@ -70,16 +70,32 @@ nMax = ceiling(max(data$V4)/1e3)*1e3
 r1 = 0.8
 r0 = 0.0
 
-rTopOnePerCentWindows = 0.6
+#rTopOnePerCentWindows = 0.6
+rTopOnePerCentWindowsTop = 0.8
+rTopOnePerCentWindowsBottom = 0.6
 
 p1 <- as.ggplot(expression(kp <- plotKaryotype(genome = custom.genome, plot.type = 1, chromosomes=l_chroms_part1, plot.params = plot.params) %>% kpAddBaseNumbers(tick.dist = 20e6, add.units = "Mbp", cex=0.5 ),
    kpAddMainTitle(kp, main= szTitle ),  
    kpPoints( kp, chr = as.character( data$V1 ), x = data$V2, 
             y = data$V4, pch=".", col=data$V5, cex=5, ymax = nMax, r0 = r0, r1 = r1),
 
-   kpPoints( kp, chr = as.character( topOnePerCentWindows$V1 ), x =
-   topOnePerCentWindows$V2, y = rTopOnePerCentWindows, pch = 24, col =
-   "darkolivegreen", bg = "darkolivegreen", cex = 0.5 ),
+
+   kpRect( kp, 
+           chr = as.character( topOnePerCentWindows$V1 ), 
+           x0 = topOnePerCentWindows$V2,
+           x1 = topOnePerCentWindows$V3,
+           y0 = rTopOnePerCentWindowsBottom,
+           y1 = rTopOnePerCentWindowsTop,
+           col = "darkolivegreen",
+           r0 = r0,
+           r1 = r1 ),
+
+
+#   kpPoints( kp, chr = as.character( topOnePerCentWindows$V1 ), x =
+#   topOnePerCentWindows$V2, y = rTopOnePerCentWindows, pch = 24, col =
+#   "darkolivegreen", bg = "darkolivegreen", cex = 0.5 ),
+
+
    kpRect( kp, chr = as.character( regions$V1 ), x0 = regions$V2, x1 =
                            regions$V3, y0 = 0.8, y1 = 1.0, col = "black", r0 = r0, r1 = r1 ),
 	kpAxis(kp, ymin = 0, ymax = nMax, r0=r0, r1= r1, numticks = 3, col="#666666", cex=1.0)  
@@ -89,7 +105,22 @@ p2 <- as.ggplot(expression(kp <- plotKaryotype(genome = custom.genome, plot.type
 
    kpPoints( kp, chr = as.character( data$V1 ), x = data$V2, y = data$V4, 
              pch=".", col=data$V5, cex=5, ymax = nMax, r0 = r0, r1 = r1),
-   kpPoints( kp, chr = as.character( topOnePerCentWindows$V1 ), x = topOnePerCentWindows$V2, y = rTopOnePerCentWindows, pch = 24, col = "darkolivegreen", bg = "darkolivegreen", cex = 0.5 ),
+
+   kpRect( kp, 
+           chr = as.character( topOnePerCentWindows$V1 ), 
+           x0 = topOnePerCentWindows$V2,
+           x1 = topOnePerCentWindows$V3,
+           y0 = rTopOnePerCentWindowsBottom,
+           y1 = rTopOnePerCentWindowsTop,
+           col = "darkolivegreen",
+           r0 = r0,
+           r1 = r1 ),
+
+
+#   kpPoints( kp, chr = as.character( topOnePerCentWindows$V1 ), x = topOnePerCentWindows$V2, y = rTopOnePerCentWindows, pch = 24, col = "darkolivegreen", bg = "darkolivegreen", cex = 0.5 ),
+
+
+
    kpRect( kp, chr = as.character( regions$V1 ), x0 = regions$V2, x1 =
                            regions$V3, y0 = 0.8, y1 = 1.0, col = "black", r0 = r0, r1 = r1 ),
    kpAxis(kp, ymin = 0, ymax = nMax, r0=r0, r1=r1, numticks = 3, col="#666666", cex=1.0)
