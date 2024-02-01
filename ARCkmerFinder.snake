@@ -45,12 +45,15 @@ szKmerCountInWindowsWithColor = szKmerCountRoot + "_in_" + str( config[ "region_
 # doesn't have counts--just windows
 szWindowsAcrossGenome = szAssemblyBasename + "_" + str( config[ "region_size" ] ) + "_windows.bed"
 szTopNPerCentKmerCountWindows = "top_N_per_cent_kmer_windows.bed"
+szTopNPerCentKmerCountWindowsSwitchedHaplotypes = "top_N_per_cent_kmer_windows_switched_haplotypes.bed"
 
 
 szFileOfContigsToDisplayOnLeft  = "contigs_to_display_on_left.txt"
 szFileOfContigsToDisplayOnRight = "contigs_to_display_on_right.txt"
 
 fileLimitForHistogram = "x_limit_for_histogram.txt"
+
+szIdeogramFileSquishHaplotypes = "ideogram_squished_haplotypes.png"
 
 
 dictShortReadDataSetForMerylDatabasePath = {}
@@ -150,7 +153,7 @@ def szGetNameOfMerylDatabaseWithLowOccurrenceKmers():
 
 
 rule all:
-	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szIdeogramFile, "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt", "count_of_frequencies_all.png", "count_kmers_each_meryl_database_flag", szHistogramFile, szHistogramLogFile, szHistogramFileLinearWithLimit
+	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szIdeogramFile, "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt", "count_of_frequencies_all.png", "count_kmers_each_meryl_database_flag", szHistogramFile, szHistogramLogFile, szHistogramFileLinearWithLimit, szIdeogramFileSquishHaplotypes
 
 
 rule makeHistogram_logx:
@@ -228,6 +231,24 @@ rule makeKmerFrequencyPlotPrerequisite:
 
 		os.rename( str( output ) + ".tmp", str( output ) )
 
+
+rule makeIdeogramSquishHaplotypes:
+	input: bed = szKmerCountInWindowsWithColor, left_contigs=szFileOfContigsToDisplayOnLeft, right_contigs=szFileOfContigsToDisplayOnRight, assemblyBedFile=szAssemblyBedFile, topNPerCent=szTopNPerCentKmerCountWindows, topNPerCentSwitchedHaplotypes=szTopNPerCentKmerCountWindowsSwitchedHaplotypes
+	output: szIdeogramFileSquishHaplotypes
+	run:
+		szCommand = "module load R/4.3.0-openblas && Rscript make_ideogram_squish_haps.R {output} {input.bed} " + szIdeogramTitle + " " + szTopNPerCentKmerCountWindows + " " + szTopNPerCentKmerCountWindowsSwitchedHaplotypes + " " + szBedFileOfPutativeIntrogressedRegions + " " + szAssemblyBedFile + " " + str(input.left_contigs ) + " " + str(input.right_contigs )
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+rule topNPerCentSwitchHaplotypes:
+	input: topNPerCent=szTopNPerCentKmerCountWindows
+	output: szTopNPerCentKmerCountWindowsSwitchedHaplotypes
+	run:
+		# warning:  contig names are hard-code here for now
+		szCommand = f"./switch_haps.py --szInputBedFile {szTopNPerCentKmerCountWindows} --szOutputBedFile {szTopNPerCentKmerCountWindowsSwitchedHaplotypes} --szContig1 Loschbour_sample1_1 --szContig2 Loschbour_sample1_2"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
 
 rule makeIdeogram:
 	input: bed = szKmerCountInWindowsWithColor, left_contigs=szFileOfContigsToDisplayOnLeft, right_contigs=szFileOfContigsToDisplayOnRight, assemblyBedFile=szAssemblyBedFile, topNPerCent=szTopNPerCentKmerCountWindows
