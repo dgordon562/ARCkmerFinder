@@ -56,6 +56,18 @@ fileLimitForHistogram = "x_limit_for_histogram.txt"
 szIdeogramFileSquishHaplotypes = "ideogram_squished_haplotypes.png"
 
 
+szBedFileOfTruePositives = "true_positives.bed"
+szBedFileOfFalsePositives = "false_positives.bed"
+szBedFileOfFalseNegatives = "false_negatives.bed"
+
+szBedFileOfTruePositives50 = "true_positives50.bed"
+szBedFileOfFalsePositives50 = "false_positives50.bed"
+szBedFileOfFalseNegatives50 = "false_negatives50.bed"
+
+# intermediate files for calculating the 6 files above
+szBedFileOfWindowsHavingAnyIntrogressedBases = "windows_having_any_introgressed_bases.bed"
+szBedFileOfWindowsHavingAnyIntrogressedBases50 = "windows_having_any_introgressed_bases50.bed"
+
 dictShortReadDataSetForMerylDatabasePath = {}
 dictFullPathOfMerylDatabaseForBasename = {}
 
@@ -154,6 +166,114 @@ def szGetNameOfMerylDatabaseWithLowOccurrenceKmers():
 
 rule all:
 	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szIdeogramFile, "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt", "count_of_frequencies_all.png", "count_kmers_each_meryl_database_flag", szHistogramFile, szHistogramLogFile, szHistogramFileLinearWithLimit, szIdeogramFileSquishHaplotypes
+
+
+rule true_positives_etc:
+     input: szWindowsAcrossGenome, szBedFileOfPutativeIntrogressedRegions, szTopNPerCentKmerCountWindows
+     output: szBedFileOfTruePositives, szBedFileOfFalsePositives, szBedFileOfFalseNegatives, "summary.txt", szBedFileOfTruePositives50, szBedFileOfFalsePositives50, szBedFileOfFalseNegatives50
+	localrule: True
+	run:
+		szCommand = "module load bedtools/2.29.2 && bedtools intersect -wa -a " + szWindowsAcrossGenome + " -b " + szBedFileOfPutativeIntrogressedRegions + " >" + szBedFileOfWindowsHavingAnyIntrogressedBases
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		# calculating true positives
+		szCommand = "module load bedtools/2.29.2 && bedtools intersect -a " + szTopNPerCentKmerCountWindows + " -b " + szBedFileOfWindowsHavingAnyIntrogressedBases + " >" + szBedFileOfTruePositives
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		# calculating false positives
+		szCommand = "module load bedtools/2.29.2 && bedtools intersect -v -a " + szTopNPerCentKmerCountWindows + " -b " + szBedFileOfWindowsHavingAnyIntrogressedBases + " >" + szBedFileOfFalsePositives
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		# calculating false negatives
+		szCommand = "module load bedtools/2.29.2 && bedtools intersect -v -a " + szBedFileOfWindowsHavingAnyIntrogressedBases + " -b " + szTopNPerCentKmerCountWindows + " >" + szBedFileOfFalseNegatives
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+		# now considering a window to contain introgressed only if at
+		# least half of the window is introgressed
+
+		szCommand = "module load bedtools/2.29.2 && bedtools intersect -wa -f 0.5 -a " + szWindowsAcrossGenome + " -b " + szBedFileOfPutativeIntrogressedRegions + " >" + szBedFileOfWindowsHavingAnyIntrogressedBases50
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		# calculating true positives 50%
+		szCommand = "module load bedtools/2.29.2 && bedtools intersect -a " + szTopNPerCentKmerCountWindows + " -b " + szBedFileOfWindowsHavingAnyIntrogressedBases50 + " >" + szBedFileOfTruePositives50
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		# calculating false positives 50%
+		szCommand = "module load bedtools/2.29.2 && bedtools intersect -v -a " + szTopNPerCentKmerCountWindows + " -b " + szBedFileOfWindowsHavingAnyIntrogressedBases50 + " >" + szBedFileOfFalsePositives50
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		# calculating false negatives 50%
+		szCommand = "module load bedtools/2.29.2 && bedtools intersect -v -a " + szBedFileOfWindowsHavingAnyIntrogressedBases50 + " -b " + szTopNPerCentKmerCountWindows + " > " + szBedFileOfFalseNegatives50
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+
+		# summarize
+		szCommand = "rm -f summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "echo true positives >>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "wc -l " + szBedFileOfTruePositives + " >>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "echo false positives >>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "wc -l " + szBedFileOfFalsePositives + ">>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "echo false negatives >>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "wc -l " + szBedFileOfFalseNegatives + ">>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		# now summarize stats considering a window to be introgressed only if half of its bases are introgressed
+
+		szCommand = "echo same stats but considering a window to be introgressed only if half of its bases are introgressed >>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "echo true positives 50% >>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "wc -l " + szBedFileOfTruePositives50 + " >>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "echo false positives 50% >>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "wc -l " + szBedFileOfFalsePositives50 + ">>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "echo false negatives 50% >>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
+
+		szCommand = "wc -l " + szBedFileOfFalseNegatives50 + ">>summary.txt"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
 
 
 rule makeHistogram_logx:
