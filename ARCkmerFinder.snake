@@ -384,7 +384,7 @@ rule figureOutWhichContigsToDisplay:
 	output: szFileOfContigsToDisplayOnLeft, szFileOfContigsToDisplayOnRight
 	localrule: True
 	run:
-		szCommand = "figureOutWhichContigsToDisplay.sh {input} " + str( config["number_of_contigs_to_display_left_and_right"] ) + " " + szFileOfContigsToDisplayOnLeft + " " + szFileOfContigsToDisplayOnRight
+		szCommand = "./figureOutWhichContigsToDisplay.sh {input} " + str( config["number_of_contigs_to_display_left_and_right"] ) + " " + szFileOfContigsToDisplayOnLeft + " " + szFileOfContigsToDisplayOnRight
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
 
@@ -393,7 +393,7 @@ rule find_top_N_per_cent_bed:
 	output: szTopNPerCentKmerCountWindows
 	localrule: True
 	run:
-		szCommand = "makeBedFileWithTopNPerCent.py --fTopPercent " + str( config["ideogram_show_triangles_at_top_this_per_cent"] ) + " --szInputBedFileWithNonZero20kbRegions " + szKmerCountInWindows + " --szBedFileOfAll20kbRegions " + szWindowsAcrossGenome + " --szOutputBedFile " + szTopNPerCentKmerCountWindows;
+		szCommand = "./makeBedFileWithTopNPerCent.py --fTopPercent " + str( config["ideogram_show_triangles_at_top_this_per_cent"] ) + " --szInputBedFileWithNonZero20kbRegions " + szKmerCountInWindows + " --szBedFileOfAll20kbRegions " + szWindowsAcrossGenome + " --szOutputBedFile " + szTopNPerCentKmerCountWindows;
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
 
