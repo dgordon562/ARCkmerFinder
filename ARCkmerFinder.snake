@@ -402,7 +402,7 @@ rule addColors:
 	output: szKmerCountInWindowsWithColor
 	localrule: True
 	run:
-		szCommand = f"cat {{input.ccount}} | addColors3.py --szContigsToDisplayOnLeft {szFileOfContigsToDisplayOnLeft} --szContigsToDisplayOnRight {szFileOfContigsToDisplayOnRight} >{{output}}"
+		szCommand = f"cat {{input.ccount}} | ./addColors3.py --szContigsToDisplayOnLeft {szFileOfContigsToDisplayOnLeft} --szContigsToDisplayOnRight {szFileOfContigsToDisplayOnRight} >{{output}}"
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
 
