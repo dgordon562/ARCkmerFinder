@@ -158,5 +158,5 @@ p2 <- as.ggplot(expression(kp <- plotKaryotype(genome = custom.genome, plot.type
 p1 <- p1 + theme_base()
 p2 <- p2 + theme_base()
 
-save_plot( szOutput,  plot_grid(p1, p2, ncol=2,  rel_widths = c(1.75,1)), base_width = 15, base_height = 9)
+save_plot( szOutput,  plot_grid(p1, p2, ncol=2,  rel_widths = c(1,1)), base_width = 15, base_height = 9)
 
