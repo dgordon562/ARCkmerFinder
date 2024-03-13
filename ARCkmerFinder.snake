@@ -479,7 +479,7 @@ rule make_meryl_lookup:
 	output: szAssemblyBasename + "_" + str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.wig"
 	resources:
 		threads=40,
-		mem=100
+		mem=200
 	run:
 		szMerylDatabase = re.sub( r'.flag$', '', str( input ) )
 		szCommand = "module load meryl/1.4.1 && meryl-lookup -wig-count -output " + str( output ) + " -sequence " + config["assembly"] + " -mers " +  szMerylDatabase 
