@@ -5,6 +5,7 @@
 #SBATCH --mem=30g
 #SBATCH --cpus-per-task=1
 
+source /panfs/jay/groups/7/hsiehph/shared/bin/initialize_conda.sh
 conda activate snakemake
 
 
