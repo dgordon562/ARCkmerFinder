@@ -364,6 +364,7 @@ rule makeIdeogramSquishHaplotypes:
 rule topNPerCentSwitchHaplotypes:
 	input: topNPerCent=szTopNPerCentKmerCountWindows
 	output: szTopNPerCentKmerCountWindowsSwitchedHaplotypes
+	localrule: True
 	run:
 		# warning:  contig names are hard-code here for now
 		szCommand = f"./switch_haps.py --szInputBedFile {szTopNPerCentKmerCountWindows} --szOutputBedFile {szTopNPerCentKmerCountWindowsSwitchedHaplotypes} --szContig1 Loschbour_sample1_1 --szContig2 Loschbour_sample1_2"
