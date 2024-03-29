@@ -288,6 +288,7 @@ rule makeHistogram_logx:
 rule makeHistogram_linear_with_limit:
 	input: szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
 	output: szHistogramFileLinearWithLimit
+	localrule: True
 	run:
 		szCommand = f"./findTopNPerCentForHistogramLimit2.py --szInputFile {szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions} --nWhichColumn 4 --fTopNPerCent 0.3 --szOutputFileContainingMax {fileLimitForHistogram}"
 		print( "about to execute: " + szCommand )
