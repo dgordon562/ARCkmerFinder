@@ -647,13 +647,15 @@ rule count_total_distinct_kmers:
 		shell( szCommand )
 
 
+# hrs=24 was not enough for denisova
 rule count_kmers_one_meryl_database:
 	input: 	szGetFullPathMerylDatabase
 	output: "{szBasenameOfMerylDatabase}.counts"
 	resources:
 		threads=40,
 		mem=120,
-		disk=100
+		disk=100,
+		hrs=48
 	run:
 		# let's see if sort becomes a bottleneck here.  If it is, then we can give it more threads
 		szCommand = f"module load meryl/1.4.1 && meryl print " + str( input ) + " | awk '{{print $2}}' | sort -n | uniq -c >" + str( output )
