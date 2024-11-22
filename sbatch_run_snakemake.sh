@@ -1,1 +1,1 @@
-sbatch --partition=sioux,agsmall run_snakemake.sh
+sbatch --partition=sioux,msismall run_snakemake.sh
