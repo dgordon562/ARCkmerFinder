@@ -1,15 +1,19 @@
 ---
-assembly: example/assembly2.fa
+#assembly: example/assembly2.fa
 # the following 2 files have format: (fof of short reads) (location of meryl database)
-file_of_datasets_of_kmers_to_find: example/datasets_to_add.fof
-file_of_datasets_of_kmers_to_remove: example/datasets_to_subtract.fof
+file_of_datasets_of_kmers_to_find: datasets_to_add.fof
+file_of_datasets_of_kmers_to_remove: datasets_to_subtract.fof
 name_of_subtracted_meryl_database: to_find_minus_to_remove.meryl
-max_number_of_kmers_indicating_an_error: 0
+max_number_of_kmers_indicating_an_error: 5
 # I'm not sure that window_size_in_kb can be changed and the pipeline still work.
 # There might be some place in the code where 20kb is assumed.
-region_size: 20000
-bed_file_of_putative_introgressed_regions: example/introgressed.bed
+region_size: 2000
+#bed_file_of_putative_introgressed_regions: /panfs/jay/groups/7/hsiehph/gordo893/samples/PNG16/verkko1.4.1/align_against_hg38/hap1_for_rustybam/introgressed_regions/regions_in_PNG16.bed
 # this is the # of contigs to display on the left
 # this is the # of contigs to display on the right
-number_of_contigs_to_display_left_and_right:  1
-ideogram_show_triangles_at_top_this_per_cent: 1.0
+number_of_contigs_to_display_left_and_right:  12
+ideogram_show_triangles_at_top_this_per_cent: 2.0
+assembly: /panfs/jay/groups/7/hsiehph/gordo893/samples/PNG15b/verkko1.4.1/PNG15_ONT_HIC/assembly.haplotype1.fasta
+bed_file_of_putative_introgressed_regions: fake_introgressed.bed
+use_existing_meryl_database: True
+existing_meryl_database_path: /panfs/jay/groups/7/hsiehph/gordo893/samples/PNG15b/verkko1.4.1/ARCkmerFinder_5errorsB/hap1/chag/to_find_minus_to_remove.meryl_no_5_low_freq_kmers.meryl
