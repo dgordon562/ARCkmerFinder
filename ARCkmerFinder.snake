@@ -490,13 +490,13 @@ rule convert_wig_to_bed:
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
 
-
+# I saw this using 600% cpu and 12G memory so decreasing it
 rule make_meryl_lookup:
 	input:  str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.meryl.flag"
 	output: szAssemblyBasename + "_" + str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.wig"
 	resources:
-		threads=10,
-		mem=100
+		threads=7,
+		mem=20
 	run:
 		if ( config["use_existing_meryl_database" ] ):
 			szMerylDatabase = config["existing_meryl_database_path" ]
