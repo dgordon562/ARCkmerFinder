@@ -78,57 +78,69 @@ aBasenameOfMerylDatabaseOfKmersToFind = []
 aBasenameOfMerylDatabaseOfKmersToRemove = []
 
 
+if ( config["use_existing_meryl_database" ] ):
 
-with open( config["file_of_datasets_of_kmers_to_find"], "r" ) as fFileOfDataSetsOfKmersToFind:
-	while True:
-		szLine = fFileOfDataSetsOfKmersToFind.readline()
-		if ( szLine == "" ):
-			break
-		if ( szLine.rstrip() == "" ):
-			continue
+        # set flag to meryl-lookup will run
+	szFlag = str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.meryl.flag"
 
-		aWords = szLine.split()
-		# looks like:
-		# (fof of short reads) (full path of meryl database)
-		if ( len( aWords ) != 2 ):
-			sys.exit( config["file_of_datasets_of_kmers_to_find" ] + " has a line " + szLine + " which should have 3 tokens but doesn't" )
+        from pathlib import Path
 
-		dictShortReadDataSetForMerylDatabasePath[ aWords[1] ] = aWords[0]
-		aFullPathOfMerylDatabaseOfKmersToFind.append( aWords[1] )
-
-		szShortName = os.path.splitext( os.path.basename( aWords[1] ))[0] 
-		aBasenameOfMerylDatabaseOfKmersToFind.append( szShortName )
-		dictFullPathOfMerylDatabaseForBasename[ szShortName ] = aWords[1]
+        Path( szFlag ).touch()
         
 
-	# while True:
+else:
+
+
+        with open( config["file_of_datasets_of_kmers_to_find"], "r" ) as fFileOfDataSetsOfKmersToFind:
+        	while True:
+        		szLine = fFileOfDataSetsOfKmersToFind.readline()
+        		if ( szLine == "" ):
+        			break
+        		if ( szLine.rstrip() == "" ):
+        			continue
+
+        		aWords = szLine.split()
+        		# looks like:
+        		# (fof of short reads) (full path of meryl database)
+        		if ( len( aWords ) != 2 ):
+        			sys.exit( config["file_of_datasets_of_kmers_to_find" ] + " has a line " + szLine + " which should have 3 tokens but doesn't" )
+
+        		dictShortReadDataSetForMerylDatabasePath[ aWords[1] ] = aWords[0]
+        		aFullPathOfMerylDatabaseOfKmersToFind.append( aWords[1] )
+
+        		szShortName = os.path.splitext( os.path.basename( aWords[1] ))[0] 
+        		aBasenameOfMerylDatabaseOfKmersToFind.append( szShortName )
+        		dictFullPathOfMerylDatabaseForBasename[ szShortName ] = aWords[1]
+                
+
+        	# while True:
 
 
 
 
-with open( config[ "file_of_datasets_of_kmers_to_remove" ], "r" ) as fFileOfDataSetsOfKmersToRemove:
-	while True:
-		szLine = fFileOfDataSetsOfKmersToRemove.readline()
-		if ( szLine == "" ):
-			break
+        with open( config[ "file_of_datasets_of_kmers_to_remove" ], "r" ) as fFileOfDataSetsOfKmersToRemove:
+        	while True:
+        		szLine = fFileOfDataSetsOfKmersToRemove.readline()
+        		if ( szLine == "" ):
+        			break
 
-		if ( szLine.rstrip() == "" ):
-			continue
+        		if ( szLine.rstrip() == "" ):
+        			continue
 
-		aWords = szLine.split()
-		# looks like:
-		# (fof of short reads) (full path of meryl database)
+        		aWords = szLine.split()
+        		# looks like:
+        		# (fof of short reads) (full path of meryl database)
 
-		dictShortReadDataSetForMerylDatabasePath[ aWords[1] ] = aWords[0]
-		aFullPathOfMerylDatabaseOfKmersToRemove.append( aWords[1] )
+        		dictShortReadDataSetForMerylDatabasePath[ aWords[1] ] = aWords[0]
+        		aFullPathOfMerylDatabaseOfKmersToRemove.append( aWords[1] )
 
-		szShortName = os.path.splitext( os.path.basename( aWords[1] ))[0] 
-		aBasenameOfMerylDatabaseOfKmersToRemove.append( szShortName )
+        		szShortName = os.path.splitext( os.path.basename( aWords[1] ))[0] 
+        		aBasenameOfMerylDatabaseOfKmersToRemove.append( szShortName )
 
-		dictFullPathOfMerylDatabaseForBasename[ szShortName ] = aWords[1]
+        		dictFullPathOfMerylDatabaseForBasename[ szShortName ] = aWords[1]
 
-	# while True:
-
+        	# while True:
+# if ( not config["use_existing_meryl_database" ] ):
 
 
 
@@ -165,7 +177,9 @@ def szGetNameOfMerylDatabaseWithLowOccurrenceKmers():
 
 
 rule all:
-	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szIdeogramFile, "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt", "count_of_frequencies_all.png", "count_kmers_each_meryl_database_flag", szHistogramFile, szHistogramLogFile, szHistogramFileLinearWithLimit, szIdeogramFileSquishHaplotypes
+	input: szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions, szIdeogramFile, szIdeogramFileSquishHaplotypes
+# rule all:
+# 	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szIdeogramFile, "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt", "count_of_frequencies_all.png", szHistogramFile, szHistogramLogFile, szHistogramFileLinearWithLimit, szIdeogramFileSquishHaplotypes
 
 
 rule true_positives_etc:
@@ -481,10 +495,14 @@ rule make_meryl_lookup:
 	input:  str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.meryl.flag"
 	output: szAssemblyBasename + "_" + str( config["name_of_subtracted_meryl_database" ] ) + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.wig"
 	resources:
-		threads=40,
-		mem=200
+		threads=10,
+		mem=100
 	run:
-		szMerylDatabase = re.sub( r'.flag$', '', str( input ) )
+		if ( config["use_existing_meryl_database" ] ):
+			szMerylDatabase = config["existing_meryl_database_path" ]
+		else:
+			szMerylDatabase = re.sub( r'.flag$', '', str( input ) )
+
 		szCommand = "module load meryl/1.4.1 && meryl-lookup -wig-count -output " + str( output ) + " -sequence " + config["assembly"] + " -mers " +  szMerylDatabase 
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
