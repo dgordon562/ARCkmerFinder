@@ -50,19 +50,21 @@ are not used.
 An fai file is made for the assembly and from this a set of windows
 (nonoverlapping) spans the genome(H).  Each window is 2kb (default)
 except, of course, for the final window in each contig.  Some fancy
-bedtools assigns each line in J (above) to a 2k window here, and then
-I count how many such lines there are in each 2k window.
+bedtools assigns each line in J (above) to a 2k window here giving an
+enormouse (300M) file (N) in which each kmer in the assembly has its
+location and also which 2k window it is in, and then I count how many
+such lines there are in each 2k window.
 
 The # of distinct kmers (AAAA is counted once no matter how many AAAA
 are in the reads) is counted for each meryl dataset.  (K) This takes a
 very long time.  It is used for the curve which I use for deciding how
 small a kmer frequency should be considered an error. (L)
 
+makeHistogramPrerequisites.py combines the # of kmers in each 2kb
+window, the list of windows across the genome, and a bed file of
+putative introgressed regions, and gives:
 
-
-
-The most important resulting file is:
-windows_across_genome_with_zero_and_nonzero_matching_kmers_and_including_introgressed_and_no_introgressed_regions.bed
+szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions = "windows_across_genome_with_zero_and_nonzero_matching_kmers_and_including_introgressed_and_no_introgressed_regions.bed"
 
 This file is used to make 3 histograms (M)
 
@@ -83,13 +85,15 @@ H:  assembly.haplotype1.bed is just a bed file of the contigs, 1 line per contig
     assembly.haplotype1_2000_windows.bed is a bed file of 2kb
     (nonoverlapping) windows spanning the contigs
 I:  assembly.haplotype1_to_find_minus_to_remove.meryl_no_5_low_freq_kmers.wig    
-J:  assembly.haplotype1_to_find_minus_to_remove.meryl_no_5_low_freq_kmers.bed
+J:  szKmerCountBed or assembly.haplotype1_to_find_minus_to_remove.meryl_no_5_low_freq_kmers.bed
 K: HG02818.counts HG02818.counts.txt Altai.counts Altai.counts.txt
    where the *.counts gives (I believe) the # of kmers (such as AAAA)
    which occur 1 time, 2 times, 3 times, ... and *.counts.txt gives the
    number of distinct kmers (such as AAAA) in the database.
 L: count_of_frequencies_all.txt count_of_frequencies_all.png
 kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt counts each kmer in the subtractred meryl database.  
+N:  szKmerCountBedWithWindow or assembly.haplotype1_to_find_minus_to_remove.m\
+eryl_no_5_low_freq_kmers.bed_with_window
 
 what is the relation of szKmerCountInWindows and szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
 
@@ -97,7 +101,12 @@ assembly.haplotype1_to_find_minus_to_remove.meryl_no_5_low_freq_kmers_in_2000_wi
 has no windows with no kmers
 
 
+This is the most important output:
+
+szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions = "windows_across_genome_with_zero_and_nonzero_matching_kmers_and_including_introgressed_and_no_introgressed_regions.bed"
+
 windows_across_genome_with_zero_and_nonzero_matching_kmers_and_including_introgressed_and_no_introgressed_regions.bed
+
 
 M:
 Altai_minus_HG03516_HG02818_logx_histogram.png
@@ -131,6 +140,16 @@ Altai_minus_HG03516_HG02818_with_limit_histogram.png
 # of (nondistinct) kmers in the read dataset, but we aren't using that
 # number for anything)
 
+# szKmerCountInWindows has a number, for each 20kb window, of kmers from
+# PNG16_vs_Chagyrskaya_minus_HG03516_greater_than_5.  If a kmer is found
+# more than once in the 20kb window, it is counted more than once?  Yes.
+# meryl-lookup notes for each kmer, how many times it is found in the
+# reads (by the meryl database).  But that count is ignored by this
+# pipeline.  Each kmer found is assigned to a 20kb window.  bedtools
+# groupby then counts how many kmers for each 20kb are found in the
+# meryl database.  Some of these kmers may be the same.  We don't know
+# and don't care.  Just how many kmers in each 20kb region are found in
+# the meryl database.
 
 
 
