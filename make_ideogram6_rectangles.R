@@ -9,6 +9,8 @@ szOutput <- args[1]
 szInputBedFile <- args[2]
 szTitle <- args[3]
 szTopOnePerCentWindows <- args[4]
+
+# this is the putative introgressed regions
 szInputRegionsForRectangles <- args[5]
 szAssemblyBedFile <- args[6]
 szFileOfContigsToDisplayOnLeft  <- args[7]
@@ -56,7 +58,8 @@ options( echo = TRUE )
 custom.genome <- toGRanges(read.delim( szAssemblyBedFile, header=F, sep=''))
 
 data <- read.delim( szInputBedFile, header = F,sep='')
-regions <- read.delim( szInputRegionsForRectangles, header = F, sep = '' )
+# no longer showing putative introgressed regions
+#regions <- read.delim( szInputRegionsForRectangles, header = F, sep = '' )
 topOnePerCentWindows <- read.delim( szTopOnePerCentWindows, header = F, sep = '' )
 
 
@@ -97,8 +100,9 @@ p1 <- as.ggplot(expression(kp <- plotKaryotype(genome = custom.genome, plot.type
 #   "darkolivegreen", bg = "darkolivegreen", cex = 0.5 ),
 
 
-   kpRect( kp, chr = as.character( regions$V1 ), x0 = regions$V2, x1 =
-                           regions$V3, y0 = 0.8, y1 = 1.0, col = "black", r0 = r0, r1 = r1 ),
+# no longer showing putative introgressed regions (12/5/2024)
+#   kpRect( kp, chr = as.character( regions$V1 ), x0 = regions$V2, x1 =
+#                           regions$V3, y0 = 0.8, y1 = 1.0, col = "black", r0 = r0, r1 = r1 ),
 	kpAxis(kp, ymin = 0, ymax = nMax, r0=r0, r1= r1, numticks = 3, col="#666666", cex=1.0)  
 ))
 
@@ -123,8 +127,9 @@ p2 <- as.ggplot(expression(kp <- plotKaryotype(genome = custom.genome, plot.type
 
 
 
-   kpRect( kp, chr = as.character( regions$V1 ), x0 = regions$V2, x1 =
-                           regions$V3, y0 = 0.8, y1 = 1.0, col = "black", r0 = r0, r1 = r1 ),
+# no longer showing putative introgressed regions (12/5/2024)
+#   kpRect( kp, chr = as.character( regions$V1 ), x0 = regions$V2, x1 =
+#                           regions$V3, y0 = 0.8, y1 = 1.0, col = "black", r0 = r0, r1 = r1 ),
    kpAxis(kp, ymin = 0, ymax = nMax, r0=r0, r1=r1, numticks = 3, col="#666666", cex=1.0)
 ))
 
