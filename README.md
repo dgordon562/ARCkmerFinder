@@ -72,6 +72,7 @@ This file is used to make 3 histograms (M)
 
 
 Files in the above description:
+```
 B:  these are listed in datasets_to_add.fof such as /panfs/jay/groups/7/hsiehph/shared/hsiehph_shared/short_read/ARC/meryl_databases/Chagyrskaya.meryl
 C:  these are listed in datasets_to_subtract.fof
 for example:
@@ -94,6 +95,7 @@ L: count_of_frequencies_all.txt count_of_frequencies_all.png
 kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt counts each kmer in the subtractred meryl database.  
 N:  szKmerCountBedWithWindow or assembly.haplotype1_to_find_minus_to_remove.m\
 eryl_no_5_low_freq_kmers.bed_with_window
+```
 
 what is the relation of szKmerCountInWindows and szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions
 
