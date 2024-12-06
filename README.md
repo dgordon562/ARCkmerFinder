@@ -115,41 +115,45 @@ Altai_minus_HG03516_HG02818_with_limit_histogram.png
 
 
 
-# meryl print looks like this:
-# AAAAAAAAAAAAAAAAAAAAA   1564811
-# AAAAAAAAAAAAAAAAAAAAC   65845
-# .
-# .
-# .
-# where the number is the # of times the given kmer is found in the
-# read dataset.
-# The number of lines is the number of distinct kmers.  The 2nd column 
-# is irrelevant.
-# But if awk '{print $2}' | sort -n | uniq -c
-# then it will look like this:
-# 2073056792 1
-# 89240217 2
-# 19355034 3
-# 8221172 4
-# which means 
-# 2073056792 kmers that occur 1 time in the read dataset
-# 89240217 kmers that occur 2 times in the read dataset
-# etc.
-# so the sum of the 1st column gives the number of distinct kmers.
-# (the sum of the product of the 1st and 2nd columns gives the number
-# of (nondistinct) kmers in the read dataset, but we aren't using that
-# number for anything)
+meryl print looks like this:
+```
+AAAAAAAAAAAAAAAAAAAAA   1564811
+AAAAAAAAAAAAAAAAAAAAC   65845
+.
+.
+.
+```
+where the number is the # of times the given kmer is found in the
+read dataset.
+The number of lines is the number of distinct kmers.  The 2nd column 
+is irrelevant.
+But if awk '{print $2}' | sort -n | uniq -c
+then it will look like this:
+```
+2073056792 1
+89240217 2
+19355034 3
+8221172 4
+which means 
+2073056792 kmers that occur 1 time in the read dataset
+89240217 kmers that occur 2 times in the read dataset
+etc.
+```
+so the sum of the 1st column gives the number of distinct kmers.
+(the sum of the product of the 1st and 2nd columns gives the number
+of (nondistinct) kmers in the read dataset, but we aren't using that
+number for anything)
 
-# szKmerCountInWindows has a number, for each 20kb window, of kmers from
-# PNG16_vs_Chagyrskaya_minus_HG03516_greater_than_5.  If a kmer is found
-# more than once in the 20kb window, it is counted more than once?  Yes.
-# meryl-lookup notes for each kmer, how many times it is found in the
-# reads (by the meryl database).  But that count is ignored by this
-# pipeline.  Each kmer found is assigned to a 20kb window.  bedtools
-# groupby then counts how many kmers for each 20kb are found in the
-# meryl database.  Some of these kmers may be the same.  We don't know
-# and don't care.  Just how many kmers in each 20kb region are found in
-# the meryl database.
+szKmerCountInWindows has a number, for each 20kb window, of kmers from
+PNG16_vs_Chagyrskaya_minus_HG03516_greater_than_5.  If a kmer is found
+more than once in the 20kb window, it is counted more than once?  Yes.
+meryl-lookup notes for each kmer, how many times it is found in the
+reads (by the meryl database).  But that count is ignored by this
+pipeline.  Each kmer found is assigned to a 20kb window.  bedtools
+groupby then counts how many kmers for each 20kb are found in the
+meryl database.  Some of these kmers may be the same.  We don't know
+and don't care.  Just how many kmers in each 20kb region are found in
+the meryl database.
 
 
 
