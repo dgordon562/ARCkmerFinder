@@ -13,7 +13,7 @@ library(ggplot2)
 png( szFile, width = 1000, height = 600  )
 
 
-df <- read.table( szInputFile )
+df <- read.table( szInputFile, comment.char = '' )
 
 
 # Change density plot line colors by groups
