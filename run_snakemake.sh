@@ -1,11 +1,11 @@
 #!/usr/bin/bash -l
 
 
-#SBATCH --time=48:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mem=30g
 #SBATCH --cpus-per-task=1
 
-source /panfs/jay/groups/7/hsiehph/shared/bin/initialize_conda.sh
+source source /projects/standard/hsiehph/shared/bin/initialize_conda.sh
 conda activate snakemake
 
 
