@@ -5,7 +5,7 @@
 #SBATCH --mem=30g
 #SBATCH --cpus-per-task=1
 
-source source /projects/standard/hsiehph/shared/bin/initialize_conda.sh
+source /projects/standard/hsiehph/shared/bin/initialize_conda.sh
 conda activate snakemake
 
 
