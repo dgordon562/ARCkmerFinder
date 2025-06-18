@@ -178,10 +178,7 @@ def szGetNameOfMerylDatabaseWithLowOccurrenceKmers():
 
 
 rule all:
-	input: szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions, szIdeogramFile, szIdeogramFileSquishHaplotypes, szHistogramLogFile, szHistogramFileLinearWithLimit, szHistogramFile
-# rule all:
-# 	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szIdeogramFile, "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt", "count_of_frequencies_all.png", szHistogramFile, szHistogramLogFile, szHistogramFileLinearWithLimit, szIdeogramFileSquishHaplotypes
-
+	input: "kmers_not_counting_repeats_after_removing_low_occurrence_kmers.txt", szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions, szIdeogramFile, szIdeogramFileSquishHaplotypes, szHistogramLogFile, szHistogramFileLinearWithLimit, szHistogramFile 
 
 rule true_positives_etc:
      input: szWindowsAcrossGenome, szBedFileOfPutativeIntrogressedRegions, szTopNPerCentKmerCountWindows
