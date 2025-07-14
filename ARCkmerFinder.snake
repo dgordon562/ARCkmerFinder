@@ -544,7 +544,7 @@ rule remove_low_occurrence_kmers:
 
 
 rule count_meryl_database_before_removing_low_occurrence_kmers:
-	input: config["name_of_subtracted_meryl_database" ] + ".flag" 
+	input: "deleted_intermediate_meryl_databases"
 	output: "kmers_not_counting_repeats_before_removing_low_occurrence_kmers.txt"
 	resources:
 		threads=40
@@ -570,6 +570,16 @@ rule count_meryl_database_before_removing_low_occurrence_kmers:
 
 
 
+
+rule delete_intermediate_meryl_databases:
+	input: touch( config["name_of_subtracted_meryl_database" ] + ".flag" )
+	output: touch( "deleted_intermediate_meryl_databases" )
+	localrule: True
+	run:
+		# delete all of the intermediate*.meryl databases
+		szCommand = "rm -rf intermediate*.meryl"
+		print( "about to execute: " + szCommand )
+		shell( szCommand )
 
 rule subtract_find_minus_remove:
 	input: "all_meryl_databases_created_flag"
