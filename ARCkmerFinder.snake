@@ -572,7 +572,7 @@ rule count_meryl_database_before_removing_low_occurrence_kmers:
 
 
 rule delete_intermediate_meryl_databases:
-	input: touch( config["name_of_subtracted_meryl_database" ] + ".flag" )
+	input: config["name_of_subtracted_meryl_database" ] + ".flag"
 	output: touch( "deleted_intermediate_meryl_databases" )
 	localrule: True
 	run:
@@ -596,20 +596,32 @@ rule subtract_find_minus_remove:
 		shell( szCommand )
 
 		for szMerylDatabaseToAdd in aFullPathOfMerylDatabaseOfKmersToFind:
-		        nIntermediateFile += 1
-		        szNextIntermediateMerylDatabase = "intermediate" + str( nIntermediateFile ) + ".meryl"
-		        szCommand = "module load meryl/1.4.1 && meryl union-sum " + szIntermediateMerylDatabase + " " + szMerylDatabaseToAdd + " output " + szNextIntermediateMerylDatabase
-		        print( "about to execute: " + szCommand )
-		        shell( szCommand )
-		        szIntermediateMerylDatabase = szNextIntermediateMerylDatabase
+			nIntermediateFile += 1
+			szNextIntermediateMerylDatabase = "intermediate" + str( nIntermediateFile ) + ".meryl"
+			szCommand = "module load meryl/1.4.1 && meryl union-sum " + szIntermediateMerylDatabase + " " + szMerylDatabaseToAdd + " output " + szNextIntermediateMerylDatabase
+			print( "about to execute: " + szCommand )
+			shell( szCommand )
+
+			# delete previous intermediate meryl database--we won't need it again
+			szCommand = f"rm -rf {szIntermediateMerylDatabase}"
+			print( "about to execute: " + szCommand )
+			shell( szCommand )
+
+			szIntermediateMerylDatabase = szNextIntermediateMerylDatabase
 
 		for szMerylDatabaseToRemove in aFullPathOfMerylDatabaseOfKmersToRemove:
-		        nIntermediateFile += 1
-		        szNextIntermediateMerylDatabase = "intermediate" + str( nIntermediateFile ) + ".meryl"
-		        szCommand = "module load meryl/1.4.1 && meryl difference " + szIntermediateMerylDatabase + " " + szMerylDatabaseToRemove + " output " + szNextIntermediateMerylDatabase
-		        print( "about to execute: " + szCommand )
-		        shell( szCommand )
-		        szIntermediateMerylDatabase = szNextIntermediateMerylDatabase
+			nIntermediateFile += 1
+			szNextIntermediateMerylDatabase = "intermediate" + str( nIntermediateFile ) + ".meryl"
+			szCommand = "module load meryl/1.4.1 && meryl difference " + szIntermediateMerylDatabase + " " + szMerylDatabaseToRemove + " output " + szNextIntermediateMerylDatabase
+			print( "about to execute: " + szCommand )
+			shell( szCommand )
+
+			# delete previous intermediate meryl database--we won't need it again
+			szCommand = f"rm -rf {szIntermediateMerylDatabase}"
+			print( "about to execute: " + szCommand )
+			shell( szCommand )
+
+			szIntermediateMerylDatabase = szNextIntermediateMerylDatabase
 
 		# how many kmers are left here
 		szCommand = "module load meryl/1.4.1 && meryl print " + szIntermediateMerylDatabase + "| wc -l >" + szIntermediateMerylDatabase + ".unique_kmers"
