@@ -516,13 +516,13 @@ rule count_meryl_database_after_removing_low_occurrence_kmers:
 		# meryl print did not speed up (seemed to even slow down) when using more threads
 		threads=1
 	run:
-        # changed 2025.08.22 DG since szMerylDatabase pointed to non-existing meryl database and meryl print created about 60 empty files
-        #szMerylDatabase = re.sub( r'.flag$', '', str( input ) )
+		# changed 2025.08.22 DG since szMerylDatabase pointed to non-existing meryl database and meryl print created about 60 empty files
+		#szMerylDatabase = re.sub( r'.flag$', '', str( input ) )
 
-        if ( config["use_existing_meryl_database" ] ):
+		if ( config["use_existing_meryl_database" ] ):
 			szMerylDatabase = config["existing_meryl_database_path" ]
 		else:
-        	szMerylDatabase = config["name_of_subtracted_meryl_database" ] + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.meryl"
+			szMerylDatabase = config["name_of_subtracted_meryl_database" ] + "_no_" + str( config[ "max_number_of_kmers_indicating_an_error" ]) + "_low_freq_kmers.meryl"
            
 
 		szTempOutput = str( output ) + ".tmp"
