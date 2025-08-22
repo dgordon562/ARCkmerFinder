@@ -51,7 +51,7 @@ An fai file is made for the assembly and from this a set of windows
 (nonoverlapping) spans the genome(H).  Each window is 2kb (default)
 except, of course, for the final window in each contig.  Some fancy
 bedtools assigns each line in J (above) to a 2k window here giving an
-enormouse (300M) file (N) in which each kmer in the assembly has its
+enormous (300M) file (N) in which each kmer in the assembly has its
 location and also which 2k window it is in, and then I count how many
 such lines there are in each 2k window.
 
