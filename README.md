@@ -4,12 +4,21 @@ To run the pipeline:
 mkdir (empty new directory)
 cd (that directory)
 git clone git@github.com:dgordon562/ARCkmerFinder.git .
-edit config.yaml
-run_snakemake.sh
-edit datasets_to_add.fof
-edit datasets_to_subtract.fof
+edit config.yaml to modify the following 2 lines:
+assembly: /projects/standard/hsiehph/shared/HGSVC3/glennisCEN/HGSVC3_repaired_assemblies/NA19238-asm-renamed-reort.fa.gz
+existing_meryl_database_path: /projects/standard/hsiehph/gordo893/samples/PNG15b/verkko1.4.1/ARCkmerFinder_5errorsB/hap1/vidija/to_find_minus_to_remove.meryl_no_5_low_freq_kmers.meryl
 
-     
+Leave all of the other lines as is.
+
+
+
+./sbatch_run_snakemake.sh
+
+It takes 6 to 10 minutes to run.
+
+The main output is:
+windows_across_genome_with_zero_and_nonzero_matching_kmers_and_including_introgressed_and_no_introgressed_regions.bed
+and lots of plots.
 
 summary of this pipeline:
 
