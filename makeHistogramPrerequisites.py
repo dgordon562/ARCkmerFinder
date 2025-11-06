@@ -84,7 +84,7 @@ print("about to execute: " + szCommand )
 subprocess.call( szCommand, shell = True )
 
 
-with open( args.szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions, "w" ) as fOutput:
+with open( args.szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions + ".tmp", "w" ) as fOutput:
     with open( szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersJustIntrogressed, "r" ) as fIntrogressed:
         while True:
             szLine = fIntrogressed.readline()
@@ -108,6 +108,8 @@ with open( args.szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncluding
             fOutput.write( szLine )
 
 
-
+szCommand = f"cat {args.szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions}.tmp | sort -k1,1V -k2,2n >{args.szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions} && rm {args.szWindowsAcrossGenomeWithZeroAndNonZeroMatchingKmersAndIncludingIntrogressedAndNoIntrogressedRegions}.tmp"
+print("about to execute: " + szCommand )
+subprocess.call( szCommand, shell = True )
 
 
