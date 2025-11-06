@@ -469,15 +469,46 @@ rule make_windows_across_genome:
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
 
+from pathlib import Path
+
+from pathlib import Path
+
+def is_directly_in_cwd(file_path):
+    """
+    Checks if the file_path is located directly in the Current Working Directory (CWD),
+    excluding files in subdirectories.
+    
+    Args:
+        file_path (str): The path to check (should represent a file).
+        
+    Returns:
+        bool: True if the file is an immediate member of the CWD.
+    """
+    # 1. Get the current working directory (CWD) and resolve its absolute path.
+    cwd = Path.cwd().resolve()
+    
+    # 2. Convert the input path, resolve it, and find its parent directory.
+    # The parent of 'file.txt' is '.', which resolves to the CWD.
+    # The parent of 'data/test.csv' is 'data', which resolves to CWD/data.
+    parent_dir_of_file = Path(file_path).resolve().parent
+    
+    # 3. Compare the file's parent directory against the CWD.
+    return parent_dir_of_file == cwd
+
+
 
 rule make_fai:
 	input: config["assembly"]
 	output: szAssemblyFai
 	localrule: True
 	run:
-		szCommand = f"ln -sf {input}"
-		print( "about to execute: " + szCommand )
-		shell( szCommand )
+		bIsInCWD = is_directly_in_cwd( str(input ) )
+		print( "is in current directory ", bIsInCWD )
+		if ( not is_directly_in_cwd( str(input ) ) ):
+			szCommand = f"ln -sf {input}"
+			print( "about to execute: " + szCommand )
+			shell( szCommand )
+                        
 		szCommand = f"module load samtools/1.20 && samtools faidx {szAssemblyBasename}"
 		print( "about to execute: " + szCommand )
 		shell( szCommand )
