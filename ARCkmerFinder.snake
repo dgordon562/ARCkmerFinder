@@ -484,16 +484,22 @@ def is_directly_in_cwd(file_path):
     Returns:
         bool: True if the file is an immediate member of the CWD.
     """
-    # 1. Get the current working directory (CWD) and resolve its absolute path.
-    cwd = Path.cwd().resolve()
-    
-    # 2. Convert the input path, resolve it, and find its parent directory.
-    # The parent of 'file.txt' is '.', which resolves to the CWD.
-    # The parent of 'data/test.csv' is 'data', which resolves to CWD/data.
-    parent_dir_of_file = Path(file_path).resolve().parent
-    
-    # 3. Compare the file's parent directory against the CWD.
-    return parent_dir_of_file == cwd
+
+    full_path = os.path.abspath(file_path)
+
+    file_dir = os.path.dirname(full_path)
+
+    print( file_dir )
+
+    current_dir = os.getcwd()
+
+    if ( file_dir == current_dir):
+       print( "the path is in the cwd" )
+       return True
+    else:
+       print("the path is not in the cwd" )
+       return False
+
 
 
 
